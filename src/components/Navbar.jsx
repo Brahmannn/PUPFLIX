@@ -1,41 +1,21 @@
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import LoginButton from "./LoginButton";
 
 function Navbar() {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    function handleScroll() {
-      if (window.scrollY > 80) {
-        setShow(true);
-      } else {
-        setShow(false);
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   return (
-    <nav className={show ? "navbar navbar-black" : "navbar"}>
-
-      <h1 className="logo">PUPFLIX</h1>
+    <nav className="navbar">
+      <h1 className="logo">
+  PUP<span>FLIX</span>
+</h1>
 
       <div className="menu">
+  <Link to="/">Home</Link>
+  <Link to="/tvshows">TV Shows</Link>
+  <Link to="/movies">Movies</Link>
+  <Link to="/mylist">My List</Link>
+</div>
 
-        <a href="#">Home</a>
-
-        <a href="#">TV Shows</a>
-
-        <a href="#">Movies</a>
-
-        <a href="#my-list">My List</a>
-
-      </div>
-
+      <LoginButton />
     </nav>
   );
 }
