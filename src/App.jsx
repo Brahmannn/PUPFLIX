@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import MovieDetails from "./pages/MovieDetails";
 
 import Home from "./pages/Home";
 import Movies from "./pages/Movies";
@@ -18,6 +19,10 @@ function App() {
         <Route path="/movies" element={<Movies />} />
         <Route path="/tvshows" element={<TVShows />} />
         <Route path="/mylist" element={<MyListPage />} />
+        <Route
+  path="/movie/:id"
+  element={<MovieDetails />}
+/>
       </Routes>
     </>
   );

@@ -11,19 +11,16 @@ function MovieRow({ title, endpoint }) {
 
   useEffect(() => {
     setLoading(true);
+
     API.get(endpoint)
       .then((response) => {
-       
         setMovies(response.data.results);
         setLoading(false);
       })
       .catch((error) => {
-
-    console.log("Error fetching movies:", error);
-
-    setLoading(false);
-
-});
+        console.log("Error fetching movies:", error);
+        setLoading(false);
+      });
   }, [endpoint]);
 
   return (
@@ -31,26 +28,18 @@ function MovieRow({ title, endpoint }) {
       <h2>{title}</h2>
 
       {loading ? (
-
-  <Loading />
-
-) : (
-
-  <div className="movie-row">
-
-    {movies.map((movie) => (
-
-      <MovieCard
-        key={movie.id}
-        movie={movie}
-        onClick={setSelectedMovie}
-      />
-
-    ))}
-
-  </div>
-
-)}
+        <Loading />
+      ) : (
+        <div className="movie-row">
+          {movies.map((movie) => (
+            <MovieCard
+              key={movie.id}
+              movie={movie}
+              onClick={setSelectedMovie}
+            />
+          ))}
+        </div>
+      )}
 
       <MovieModal
         movie={selectedMovie}

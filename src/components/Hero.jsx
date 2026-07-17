@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import API from "../services/tmdb";
-import Navbar from "./Navbar";
 
 function Hero() {
 
