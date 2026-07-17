@@ -1,58 +1,103 @@
-import { createContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+import { useAuth } from "./AuthContext";
+import { db } from "../firebase/firebase";
+
+import {
+  collection,
+  getDocs,
+} from "firebase/firestore";
+
+import {
+  saveMovie,
+  removeMovie,
+} from "../services/firestore";
 
 const FavoritesContext = createContext();
 
 export function FavoritesProvider({ children }) {
+  const { user } = useAuth();
 
-  const [favorites, setFavorites] = useState(() => {
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    return JSON.parse(localStorage.getItem("favorites")) || [];
-
-  });
-
+  // Load all favorites when user logs in
   useEffect(() => {
+    async function loadFavorites() {
+      if (!user) {
+        setFavorites([]);
+        setLoading(false);
+        return;
+      }
 
-    localStorage.setItem(
-      "favorites",
-      JSON.stringify(favorites)
-    );
+      try {
+        const snapshot = await getDocs(
+          collection(db, "users", user.uid, "favorites")
+        );
 
-  }, [favorites]);
+        const movies = snapshot.docs.map((doc) => doc.data());
 
-  const addFavorite = (movie) => {
+        setFavorites(movies);
+      } catch (err) {
+        console.error(err);
+      }
 
-    if (!favorites.find((m) => m.id === movie.id)) {
-
-      setFavorites([...favorites, movie]);
-
+      setLoading(false);
     }
 
+    loadFavorites();
+  }, [user]);
+
+  // Save movie
+  const addToFavorites = async (movie) => {
+    if (!user) {
+      alert("Please login first.");
+      return;
+    }
+
+    await saveMovie(user.uid, movie);
+
+    setFavorites((prev) => [...prev, movie]);
   };
 
-  const removeFavorite = (movieId) => {
+  // Remove movie
+  const removeFromFavorites = async (movieId) => {
+    if (!user) return;
 
-    setFavorites(
-      favorites.filter((movie) => movie.id !== movieId)
+    await removeMovie(user.uid, movieId);
+
+    setFavorites((prev) =>
+      prev.filter((movie) => movie.id !== movieId)
     );
+  };
 
+  // Check if movie exists
+  const isFavorite = (movieId) => {
+    return favorites.some(
+      (movie) => movie.id === movieId
+    );
   };
 
   return (
-
     <FavoritesContext.Provider
       value={{
         favorites,
-        addFavorite,
-        removeFavorite
+        loading,
+        addToFavorites,
+        removeFromFavorites,
+        isFavorite,
       }}
     >
-
       {children}
-
     </FavoritesContext.Provider>
-
   );
-
 }
 
-export default FavoritesContext;
+export function useFavorites() {
+  return useContext(FavoritesContext);
+}

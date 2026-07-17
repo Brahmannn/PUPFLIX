@@ -1,26 +1,25 @@
 import { useEffect, useState } from "react";
 import API from "../services/tmdb";
-import {
-  addFavorite,
-  removeFavorite,
-  isFavorite,
-} from "../utils/favorites";
+import { useFavorites } from "../context/FavoritesContext";
 
 function MovieModal({ movie, onClose }) {
+  const {
+    addToFavorites,
+    removeFromFavorites,
+    isFavorite,
+  } = useFavorites();
+
+  const favorite = movie ? isFavorite(movie.id) : false;
+
   const [trailerKey, setTrailerKey] = useState("");
   const [showTrailer, setShowTrailer] = useState(false);
-  const [favorite, setFavorite] = useState(false);
 
   useEffect(() => {
     if (!movie) {
       setTrailerKey("");
-      setFavorite(false);
       setShowTrailer(false);
       return;
     }
-
-    // Check if movie is already in favorites
-    setFavorite(isFavorite(movie.id));
 
     async function fetchTrailer() {
       try {
@@ -38,7 +37,7 @@ function MovieModal({ movie, onClose }) {
           setTrailerKey("");
         }
       } catch (error) {
-        console.log("Error fetching trailer:", error);
+        console.error("Error fetching trailer:", error);
         setTrailerKey("");
       }
     }
@@ -51,7 +50,6 @@ function MovieModal({ movie, onClose }) {
   return (
     <div className="modal-overlay">
       <div className="modal">
-
         <button
           className="close-btn"
           onClick={() => {
@@ -71,7 +69,7 @@ function MovieModal({ movie, onClose }) {
             frameBorder="0"
             allow="autoplay; encrypted-media"
             allowFullScreen
-          ></iframe>
+          />
         ) : (
           <img
             src={
@@ -84,7 +82,6 @@ function MovieModal({ movie, onClose }) {
         )}
 
         <div className="modal-content">
-
           <h2>{movie.title || movie.name}</h2>
 
           <div className="movie-details">
@@ -102,7 +99,6 @@ function MovieModal({ movie, onClose }) {
           <p>{movie.overview}</p>
 
           <div className="modal-buttons">
-
             <button
               className="play-btn"
               onClick={() => {
@@ -118,23 +114,18 @@ function MovieModal({ movie, onClose }) {
 
             <button
               className="list-btn"
-              onClick={() => {
+              onClick={async () => {
                 if (favorite) {
-                  removeFavorite(movie.id);
-                  setFavorite(false);
+                  await removeFromFavorites(movie.id);
                 } else {
-                  addFavorite(movie);
-                  setFavorite(true);
+                  await addToFavorites(movie);
                 }
               }}
             >
               {favorite ? "✔ Remove" : "+ My List"}
             </button>
-
           </div>
-
         </div>
-
       </div>
     </div>
   );
