@@ -1,12 +1,10 @@
 import Hero from "../components/Hero";
 import SearchBar from "../components/SearchBar";
-import MovieRow from "../components/MovieRow";
-import MyList from "../components/MyList";
 import GenreSelector from "../components/GenreSelector";
+import MovieRow from "../components/MovieRow";
 import { useState } from "react";
 
 function Home() {
-
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState(null);
 
@@ -21,21 +19,16 @@ function Home() {
       )}
 
       {searchQuery ? (
-
         <MovieRow
           title={`🔍 Search Results for "${searchQuery}"`}
           endpoint={`/search/movie?query=${encodeURIComponent(searchQuery)}`}
         />
-
       ) : selectedGenre ? (
-
         <MovieRow
           title="🎭 Genre Movies"
           endpoint={`/discover/movie?with_genres=${selectedGenre}`}
         />
-
       ) : (
-
         <>
           <MovieRow
             title="🔥 Trending Now"
@@ -56,11 +49,7 @@ function Home() {
             title="💥 Action Movies"
             endpoint="/discover/movie?with_genres=28"
           />
-
-          <MyList />
-
         </>
-
       )}
     </>
   );

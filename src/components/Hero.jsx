@@ -58,8 +58,6 @@ function Hero() {
       }}
     >
 
-      <Navbar />
-
       <div className="hero-content">
 
         <h1>{movie.title}</h1>
