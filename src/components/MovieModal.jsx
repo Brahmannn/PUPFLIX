@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import API from "../services/tmdb";
 import { useFavorites } from "../context/FavoritesContext";
+import { toast } from "react-toastify";
+import { saveWatchHistory } from "../firebase/watchHistory";
 
 function MovieModal({ movie, onClose }) {
   const {
@@ -13,19 +15,39 @@ function MovieModal({ movie, onClose }) {
 
   const [trailerKey, setTrailerKey] = useState("");
   const [showTrailer, setShowTrailer] = useState(false);
+  const [movieDetails, setMovieDetails] = useState(null);
+  const [cast, setCast] = useState([]);
+  const [director, setDirector] = useState("");
 
   useEffect(() => {
     if (!movie) {
-      setTrailerKey("");
-      setShowTrailer(false);
-      return;
-    }
+  setTrailerKey("");
+  setShowTrailer(false);
+  setMovieDetails(null);
+  setCast([]);
+  setDirector("");
+  return;
+}
 
-    async function fetchTrailer() {
+    async function fetchMovieData() {
       try {
-        const response = await API.get(`/movie/${movie.id}/videos`);
+        const [videoResponse, detailsResponse, creditsResponse] =
+  await Promise.all([
+    API.get(`/movie/${movie.id}/videos`),
+    API.get(`/movie/${movie.id}`),
+    API.get(`/movie/${movie.id}/credits`),
+  ]);
 
-        const trailer = response.data.results.find(
+        setMovieDetails(detailsResponse.data);
+        setCast(creditsResponse.data.cast.slice(0, 5));
+
+const movieDirector = creditsResponse.data.crew.find(
+  (person) => person.job === "Director"
+);
+
+setDirector(movieDirector ? movieDirector.name : "Unknown");
+
+        const trailer = videoResponse.data.results.find(
           (video) =>
             video.site === "YouTube" &&
             video.type === "Trailer"
@@ -37,12 +59,12 @@ function MovieModal({ movie, onClose }) {
           setTrailerKey("");
         }
       } catch (error) {
-        console.error("Error fetching trailer:", error);
+        console.error("Error fetching movie data:", error);
         setTrailerKey("");
       }
     }
 
-    fetchTrailer();
+    fetchMovieData();
   }, [movie]);
 
   if (!movie) return null;
@@ -88,6 +110,17 @@ function MovieModal({ movie, onClose }) {
             <span>⭐ {movie.vote_average?.toFixed(1)}</span>
 
             <span>
+              🗳 {movie.vote_count?.toLocaleString()} Votes
+            </span>
+
+            {movieDetails?.runtime && (
+              <span>
+                ⏱ {Math.floor(movieDetails.runtime / 60)}h{" "}
+                {movieDetails.runtime % 60}m
+              </span>
+            )}
+
+            <span>
               📅 {movie.release_date || movie.first_air_date}
             </span>
 
@@ -96,7 +129,33 @@ function MovieModal({ movie, onClose }) {
             </span>
           </div>
 
+          {movieDetails?.genres?.length > 0 && (
+            <div className="movie-genres">
+              {movieDetails.genres.map((genre) => (
+                <span
+                  key={genre.id}
+                  className="genre-badge"
+                >
+                  {genre.name}
+                </span>
+              ))}
+            </div>
+          )}
+
           <p>{movie.overview}</p>
+          <div className="movie-cast">
+  <strong>👥 Cast:</strong>
+
+  {cast.map((actor) => (
+    <span key={actor.id}>
+      {actor.name}
+      {", "}
+    </span>
+  ))}
+</div>
+<div className="movie-director">
+  <strong>🎬 Director:</strong> {director}
+</div>
 
           <div className="modal-buttons">
             <button
@@ -105,7 +164,7 @@ function MovieModal({ movie, onClose }) {
                 if (trailerKey) {
                   setShowTrailer(true);
                 } else {
-                  alert("Trailer not available.");
+                  toast.error("Trailer not available!");
                 }
               }}
             >
@@ -116,10 +175,12 @@ function MovieModal({ movie, onClose }) {
               className="list-btn"
               onClick={async () => {
                 if (favorite) {
-                  await removeFromFavorites(movie.id);
-                } else {
-                  await addToFavorites(movie);
-                }
+    await removeFromFavorites(movie.id);
+    toast.info("Removed from My List");
+} else {
+    await addToFavorites(movie);
+    toast.success("Added to My List");
+}
               }}
             >
               {favorite ? "✔ Remove" : "+ My List"}

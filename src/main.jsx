@@ -2,11 +2,14 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
-import "./index.css";
 import App from "./App";
+import "./index.css";
 
-import { FavoritesProvider } from "./context/FavoritesContext";
 import { AuthProvider } from "./context/AuthContext";
+import { FavoritesProvider } from "./context/FavoritesContext";
+
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -14,6 +17,17 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <AuthProvider>
         <FavoritesProvider>
           <App />
+
+          <ToastContainer
+            position="bottom-right"
+            autoClose={2500}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            draggable
+            theme="dark"
+          />
         </FavoritesProvider>
       </AuthProvider>
     </BrowserRouter>

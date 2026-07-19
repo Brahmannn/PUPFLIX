@@ -2,6 +2,7 @@ import Hero from "../components/Hero";
 import SearchBar from "../components/SearchBar";
 import GenreSelector from "../components/GenreSelector";
 import MovieRow from "../components/MovieRow";
+import ContinueWatching from "../components/ContinueWatching";
 import { useState } from "react";
 
 function Home() {
@@ -15,7 +16,11 @@ function Home() {
       <SearchBar onSearch={setSearchQuery} />
 
       {!searchQuery && (
-        <GenreSelector onGenreSelect={setSelectedGenre} />
+        <>
+          <ContinueWatching />
+
+          <GenreSelector onGenreSelect={setSelectedGenre} />
+        </>
       )}
 
       {searchQuery ? (

@@ -1,8 +1,10 @@
+import SkeletonCard from "./SkeletonCard";
+
 function Loading() {
   return (
     <div className="movie-row">
       {[...Array(8)].map((_, index) => (
-        <div className="loading-card" key={index}></div>
+        <SkeletonCard key={index} />
       ))}
     </div>
   );
